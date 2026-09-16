@@ -84,7 +84,7 @@ def create_item_service(item: Item) -> Item:
 def create_two_items_service(
     item1: Item,
     item2: Item,
-):
+) -> list[Item]:
     conn = get_connection()
 
     try:
@@ -102,7 +102,7 @@ def create_two_items_service(
     finally:
         conn.close()
 
-    return item1, item2
+    return [item1, item2]
 
 
 def delete_item_service(id: int) -> None:
@@ -124,4 +124,3 @@ def delete_item_service(id: int) -> None:
 
     finally:
         conn.close()
-
