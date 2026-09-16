@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, Request, HTTPException, status
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 
 from models import ItemCreate, ItemResponse
@@ -20,6 +21,8 @@ from service import (
     delete_item_service,
 )
 
+from exceptions import BusinessRuleError, ItemNotFoundError
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -28,6 +31,22 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+
+@app.exception_handler(BusinessRuleError)
+async def handle_bussiness_rule_error(request: Request, exc: BusinessRuleError):
+    return JSONResponse(
+        status_code=400,
+        content={"detail": str(exc)},
+    )
+
+
+@app.exception_handler(ItemNotFoundError)
+async def handle_item_not_found_error(request: Request, exc: ItemNotFoundError):
+    return JSONResponse(
+        status_code=404,
+        content={"detail": str(exc)},
+    )
 
 
 @app.get("/")
@@ -60,9 +79,6 @@ def get_items_api():
 def get_item_api(id: int):
     row = get_item_service(id)
 
-    if row is None:
-        raise HTTPException(status_code=404, detail="Item not found")
-
     return row
 
 
@@ -71,10 +87,7 @@ def get_item_api(id: int):
     status_code=status.HTTP_204_NO_CONTENT,
 )
 def delete_item_api(id: int):
-    has_found = delete_item_service(id)
-
-    if not has_found:
-        raise HTTPException(status_code=404, detail="Item not found")
+    delete_item_service(id)
 
 
 @app.put("/items/{id}", response_model=ItemResponse)
@@ -87,12 +100,6 @@ def update_item_api(id: int, item: ItemCreate):
         quantity=item.quantity,
     )
 
-    try:
-        updated_item = update_item_service(db_item)
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-    if updated_item is None:
-        raise HTTPException(status_code=404, detail="Item not found")
+    updated_item = update_item_service(db_item)
 
     return updated_item

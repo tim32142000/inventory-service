@@ -184,6 +184,21 @@ def test_create_item_invalid_type(client):
     assert response.status_code == 422
 
 
+def test_create_item_invalid_business_quantity(client):
+    response = client.post(
+        "/items",
+        json={
+            "name": "test item",
+            "category": "test",
+            "price": 2,
+            "quantity": 10001,
+        },
+    )
+
+    assert response.status_code == 400
+    assert response.json() == {"detail": "Quantity can not greater than 10000"}
+
+
 @pytest.mark.parametrize("quantity", [-1, -10, -100])
 def test_create_item_invalid_quantity(client, quantity):
     response = client.post(

@@ -7,13 +7,14 @@ from database import (
     get_connection,
 )
 from database_models import Item
+from exceptions import BusinessRuleError, ItemNotFoundError
 
 # Business Rule in this file
 
 
 def validate_item(item: Item):
     if item.quantity > 10000:
-        raise ValueError("Quantity can not greater than 10000")
+        raise BusinessRuleError("Quantity can not greater than 10000")
 
 
 def get_items_service() -> list[Item]:
@@ -25,19 +26,22 @@ def get_items_service() -> list[Item]:
         return items
 
 
-def get_item_service(id: int) -> Item | None:
+def get_item_service(id: int) -> Item:
     with get_connection() as conn:
-        return get_item(conn, id)
+        result = get_item(conn, id)
+        if result is None:
+            raise ItemNotFoundError(id)
+        return result
 
 
-def update_item_service(item: Item) -> Item | None:
+def update_item_service(item: Item) -> Item:
     conn = get_connection()
 
     try:
         before_update = get_item(conn, item.id)
 
         if before_update is None:
-            return None
+            raise ItemNotFoundError(item.id)
 
         validate_item(item)
 
@@ -101,14 +105,14 @@ def create_two_items_service(
     return item1, item2
 
 
-def delete_item_service(id: int) -> bool:
+def delete_item_service(id: int) -> None:
     conn = get_connection()
 
     try:
         before_delete = get_item(conn, id)
 
         if before_delete is None:
-            return False
+            raise ItemNotFoundError(id)
 
         delete_item(conn, id)
 
@@ -121,4 +125,3 @@ def delete_item_service(id: int) -> bool:
     finally:
         conn.close()
 
-    return True
