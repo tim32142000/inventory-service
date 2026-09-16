@@ -51,7 +51,7 @@ pip install -r requirements.txt
 ## 啟動伺服器
 
 ```bash
-uvicorn main:app --reload
+uvicorn main:app
 ```
 
 啟動後可至 `http://127.0.0.1:8000/docs` 查看自動產生的 Swagger UI 文件。
