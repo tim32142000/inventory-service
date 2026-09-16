@@ -147,6 +147,29 @@ def test_delete_item(client):
     assert get_response.status_code == 404
 
 
+@pytest.mark.parametrize("quantity", [0, 10000])
+def test_create_item_valid_quantity(client, quantity):
+    response = client.post(
+        "/items",
+        json={
+            "name": "test item",
+            "category": "test",
+            "price": 2,
+            "quantity": quantity,
+        },
+    )
+
+    assert response.status_code == 201
+
+    data = response.json()
+
+    assert data["name"] == "test item"
+    assert data["category"] == "test"
+    assert data["price"] == 2
+    assert data["quantity"] == quantity
+    assert data["id"] > 0
+
+
 def test_create_item_invalid_type(client):
     response = client.post(
         "/items",
@@ -156,6 +179,30 @@ def test_create_item_invalid_type(client):
             "price": 2,
             "quantity": "invalid",
         },
+    )
+
+    assert response.status_code == 422
+
+
+@pytest.mark.parametrize("quantity", [-1, -10, -100])
+def test_create_item_invalid_quantity(client, quantity):
+    response = client.post(
+        "/items",
+        json={
+            "name": "test item",
+            "category": "test",
+            "price": 2,
+            "quantity": quantity,
+        },
+    )
+
+    assert response.status_code == 422
+
+
+def test_create_item_invalid_name(client):
+    response = client.post(
+        "/items",
+        json={"name": "", "category": "test", "price": 2, "quantity": 6},
     )
 
     assert response.status_code == 422
@@ -173,13 +220,14 @@ def test_delete_invalid_item_id(client):
     assert response.status_code == 404
 
 
-def test_create_invalid_item_does_not_create_data(client):
+@pytest.mark.parametrize("price", [-1, -10, -100])
+def test_create_invalid_item_does_not_create_data(client, price):
     response = client.post(
         "/items",
         json={
             "name": "invalid item",
             "category": "test",
-            "price": -2,
+            "price": price,
             "quantity": 47,
         },
     )
