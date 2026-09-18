@@ -33,21 +33,32 @@ def init_db():
     conn.close()
 
 
-def get_list_items(conn, category: str | None = None) -> list[Item]:
-    if category is None:
-        cursor = conn.execute("""
-        SELECT *
-        FROM items
-        """)
-    else:
-        cursor = conn.execute(
-            """
-            SELECT *
-            FROM items
-            WHERE category = ?
-            """,
-            (category,),
-        )
+def get_list_items(
+    conn, category: str | None = None, sort_by: str | None = None, order: str = "asc"
+) -> list[Item]:
+    query = """
+    SELECT *
+    FROM items
+    """
+
+    parameters = []
+
+    if category is not None:
+        query += " WHERE category = ?"
+        parameters.append(category)
+
+    sort_options = {
+        ("price", "asc"): " ORDER BY price ASC",
+        ("price", "desc"): " ORDER BY price DESC",
+    }
+
+    if sort_by is not None:
+        try:
+            query += sort_options[(sort_by, order)]
+        except KeyError:
+            raise ValueError("Invalid sorting option")
+
+    cursor = conn.execute(query, parameters)
 
     rows = cursor.fetchall()
 

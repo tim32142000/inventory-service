@@ -64,7 +64,7 @@ def test_get_all_items_filtered_by_category(client):
             "category": "tool",
             "price": 500,
             "quantity": 3,
-        }
+        },
     )
 
     assert food_response.status_code == 201
@@ -324,3 +324,124 @@ def test_update_item_invalid_quantity(client):
         "price": 2,
         "quantity": 7300,
     }
+
+
+@pytest.mark.parametrize(
+    ("order", "expected_prices"), [("asc", [100, 300, 500]), ("desc", [500, 300, 100])]
+)
+def test_get_items_sorted_by_price(client, order, expected_prices):
+    items = [
+        {
+            "name": "expensive",
+            "price": 500,
+        },
+        {
+            "name": "cheap",
+            "price": 100,
+        },
+        {
+            "name": "medium",
+            "price": 300,
+        },
+    ]
+
+    for item in items:
+        response = client.post(
+            "/items",
+            json={
+                "name": item["name"],
+                "category": "test",
+                "price": item["price"],
+                "quantity": 1,
+            },
+        )
+
+    assert response.status_code == 201
+
+    response = client.get(
+        "/items",
+        params={
+            "sort_by": "price",
+            "order": order,
+        },
+    )
+
+    assert response.status_code == 200
+
+    prices = [item["price"] for item in response.json()]
+
+    assert prices == expected_prices
+
+
+@pytest.mark.parametrize(
+    "params",
+    [
+        {
+            "sort_by": "name",
+            "order": "asc",
+        },
+        {
+            "sort_by": "price",
+            "order": "unknown",
+        },
+    ],
+    ids=[
+        "invalid-sort-field",
+        "invalid-order",
+    ],
+)
+def test_get_items_rejects_invalid_sorting(client, params):
+    response = client.get(
+        "/items",
+        params=params,
+    )
+
+    assert response.status_code == 422
+
+
+def test_get_items_filtered_and_sorted(client):
+    items = [
+        {
+            "name": "expensive food",
+            "category": "food",
+            "price": 500,
+        },
+        {
+            "name": "cheap tool",
+            "category": "tool",
+            "price": 50,
+        },
+        {
+            "name": "cheap food",
+            "category": "food",
+            "price": 100,
+        },
+    ]
+
+    for item in items:
+        response = client.post(
+            "/items",
+            json={
+                "name": item["name"],
+                "category": item["category"],
+                "price": item["price"],
+                "quantity": 1,
+            },
+        )
+
+        assert response.status_code == 201
+
+    response = client.get(
+        "/items",
+        params={
+            "category": "food",
+            "sort_by": "price",
+            "order": "asc",
+        },
+    )
+
+    assert response.status_code == 200
+
+    names = [item["name"] for item in response.json()]
+
+    assert names == ["cheap food", "expensive food"]

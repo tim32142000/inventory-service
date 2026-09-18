@@ -17,20 +17,31 @@ def validate_item(item: Item):
         raise BusinessRuleError("Quantity can not greater than 10000")
 
 
-def get_list_items_service(category: str | None = None) -> list[Item]:
-    with get_connection() as conn:
+def get_list_items_service(
+    category: str | None = None, sort_by: str | None = None, order: str = "asc"
+) -> list[Item]:
+    conn = get_connection()
 
-        items = get_list_items(conn, category)
+    try:
+
+        items = get_list_items(conn, category, sort_by, order)
 
         return items
 
+    finally:
+        conn.close()
+
 
 def get_item_service(id: int) -> Item:
-    with get_connection() as conn:
+    conn = get_connection()
+
+    try:
         result = get_item(conn, id)
         if result is None:
             raise ItemNotFoundError(id)
         return result
+    finally:
+        conn.close()
 
 
 def update_item_service(item: Item) -> Item:

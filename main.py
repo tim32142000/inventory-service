@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, HTTPException, status
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
+from typing import Literal
 
 from models import ItemCreate, ItemResponse
 from database_models import Item
@@ -71,8 +72,12 @@ def create_item_api(item: ItemCreate):
 
 
 @app.get("/items", response_model=list[ItemResponse])
-def get_list_items_api(category: str|None = None):
-    return get_list_items_service(category)
+def get_list_items_api(
+    category: str | None = None,
+    sort_by: Literal["price"] | None = None,
+    order: Literal["asc", "desc"] = "asc",
+):
+    return get_list_items_service(category, sort_by, order)
 
 
 @app.get("/items/{id}", response_model=ItemResponse)
