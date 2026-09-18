@@ -1,6 +1,6 @@
 from database import (
     create_item,
-    get_items,
+    get_list_items,
     get_item,
     update_item,
     delete_item,
@@ -17,11 +17,10 @@ def validate_item(item: Item):
         raise BusinessRuleError("Quantity can not greater than 10000")
 
 
-def get_items_service() -> list[Item]:
-    print("service: entered")
+def get_list_items_service(category: str | None = None) -> list[Item]:
     with get_connection() as conn:
 
-        items = get_items(conn)
+        items = get_list_items(conn, category)
 
         return items
 

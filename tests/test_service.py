@@ -4,16 +4,13 @@ import database
 import service
 
 from database_models import Item
+from exceptions import ItemNotFoundError
 
+def test_get_item_service_not_found(test_db):
+    item_id = 999999
 
-@pytest.fixture
-def test_db(tmp_path):
-    db_path = tmp_path / "test.db"
-
-    database.set_db_name(str(db_path))
-    database.init_db()
-
-    return db_path
+    with pytest.raises(ItemNotFoundError, match=f"Item {item_id} not found"):
+        service.get_item_service(item_id)
 
 
 def test_create_two_items_service_rollback(test_db, monkeypatch):
@@ -43,4 +40,4 @@ def test_create_two_items_service_rollback(test_db, monkeypatch):
     assert call_count == 2
 
     with database.get_connection() as conn:
-        assert database.get_items(conn) == []
+        assert database.get_list_items(conn) == []

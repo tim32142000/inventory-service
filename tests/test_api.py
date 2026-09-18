@@ -6,12 +6,7 @@ from main import app
 
 
 @pytest.fixture
-def client(tmp_path):
-    db_path = tmp_path / "test.db"
-
-    database.set_db_name(str(db_path))
-    database.init_db()
-
+def client(test_db):
     with TestClient(app) as client:
         yield client
 
@@ -45,11 +40,43 @@ def test_create_item(client):
     assert data["quantity"] == 10
 
 
-def test_get_items(client):
+def test_get_list_items(client):
     response = client.get("/items")
 
     assert response.status_code == 200
     assert response.json() == []
+
+
+def test_get_all_items_filtered_by_category(client):
+    food_response = client.post(
+        "/items",
+        json={
+            "name": "apple",
+            "category": "food",
+            "price": 30,
+            "quantity": 10,
+        },
+    )
+    tool_response = client.post(
+        "/items",
+        json={
+            "name": "hammer",
+            "category": "tool",
+            "price": 500,
+            "quantity": 3,
+        }
+    )
+
+    assert food_response.status_code == 201
+    assert tool_response.status_code == 201
+
+    response = client.get(
+        "/items",
+        params={"category": "food"},
+    )
+
+    assert response.status_code == 200
+    assert response.json() == [food_response.json()]
 
 
 def test_get_item(client):
@@ -198,6 +225,11 @@ def test_create_item_invalid_business_quantity(client):
     assert response.status_code == 400
     assert response.json() == {"detail": "Quantity can not greater than 10000"}
 
+    get_response = client.get("/items")
+
+    assert get_response.status_code == 200
+    assert get_response.json() == []
+
 
 @pytest.mark.parametrize("quantity", [-1, -10, -100])
 def test_create_item_invalid_quantity(client, quantity):
@@ -262,7 +294,7 @@ def test_update_item_invalid_quantity(client):
             "name": "test item",
             "category": "test",
             "price": 2,
-            "quantity": 7354,
+            "quantity": 7300,
         },
     )
 
@@ -275,9 +307,20 @@ def test_update_item_invalid_quantity(client):
             "name": "test update",
             "category": "test",
             "price": 2,
-            "quantity": 17354,
+            "quantity": 17300,
         },
     )
 
     assert response.status_code == 400
     assert response.json() == {"detail": "Quantity can not greater than 10000"}
+
+    get_response = client.get(f"/items/{item_id}")
+
+    assert get_response.status_code == 200
+    assert get_response.json() == {
+        "id": item_id,
+        "name": "test item",
+        "category": "test",
+        "price": 2,
+        "quantity": 7300,
+    }

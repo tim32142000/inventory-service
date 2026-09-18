@@ -9,13 +9,13 @@ from database_models import Item
 
 from database import (
     init_db,
-    get_items,
+    get_list_items,
     delete_item,
 )
 
 from service import (
     create_item_service,
-    get_items_service,
+    get_list_items_service,
     get_item_service,
     update_item_service,
     delete_item_service,
@@ -71,8 +71,8 @@ def create_item_api(item: ItemCreate):
 
 
 @app.get("/items", response_model=list[ItemResponse])
-def get_items_api():
-    return get_items_service()
+def get_list_items_api(category: str|None = None):
+    return get_list_items_service(category)
 
 
 @app.get("/items/{id}", response_model=ItemResponse)

@@ -33,12 +33,21 @@ def init_db():
     conn.close()
 
 
-def get_items(conn) -> list[Item]:
-
-    cursor = conn.execute("""
-    SELECT *
-    FROM items
-    """)
+def get_list_items(conn, category: str | None = None) -> list[Item]:
+    if category is None:
+        cursor = conn.execute("""
+        SELECT *
+        FROM items
+        """)
+    else:
+        cursor = conn.execute(
+            """
+            SELECT *
+            FROM items
+            WHERE category = ?
+            """,
+            (category,),
+        )
 
     rows = cursor.fetchall()
 
