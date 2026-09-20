@@ -80,7 +80,7 @@ def get_item(conn, id: int) -> Item | None:
         SELECT *
         FROM items
         WHERE id = ?
-    """,
+        """,
         (id,),
     )
 
@@ -106,7 +106,7 @@ def create_item(conn, item: Item) -> int:
         INSERT INTO items
         (name, category, price, quantity)
         VALUES (?, ?, ?, ?)
-    """,
+        """,
         (
             item.name,
             item.category,

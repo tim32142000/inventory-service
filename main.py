@@ -1,3 +1,5 @@
+import uvicorn
+
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request, HTTPException, status
@@ -108,3 +110,7 @@ def update_item_api(id: int, item: ItemCreate):
     updated_item = update_item_service(db_item)
 
     return updated_item
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="127.0.0.1", port=8000)
