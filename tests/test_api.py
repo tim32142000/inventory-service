@@ -445,3 +445,49 @@ def test_get_items_filtered_and_sorted(client):
     names = [item["name"] for item in response.json()]
 
     assert names == ["cheap food", "expensive food"]
+
+
+def test_adjust_stock_increases_quantity(client):
+    create_response = client.post(
+        "/items",
+        json={
+            "name": "apple",
+            "category": "food",
+            "price": 30,
+            "quantity": 10,
+        },
+    )
+
+    assert create_response.status_code == 201
+
+    item_id = create_response.json()["id"]
+
+    response = client.post(f"/items/{item_id}/stock-adjustments", json={"change": 5})
+
+    assert response.status_code == 200
+    assert response.json()["quantity"] == 15
+
+
+def test_adjust_stock_rejects_zero_change(client):
+    create_response = client.post(
+        "/items",
+        json={
+            "name": "apple",
+            "category": "food",
+            "price": 30,
+            "quantity": 10,
+        },
+    )
+
+    assert create_response.status_code == 201
+
+    item_id = create_response.json()["id"]
+
+    response = client.post(f"/items/{item_id}/stock-adjustments", json={"change": 0})
+
+    assert response.status_code == 422
+
+    get_response = client.get(f"/items/{item_id}")
+
+    assert get_response.status_code == 200
+    assert get_response.json()["quantity"] == 10

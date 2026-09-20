@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from typing import Literal
 
-from models import ItemCreate, ItemResponse
+from models import ItemCreate, ItemResponse, StockAdjustment
 from database_models import Item
 
 from database import (
@@ -22,6 +22,7 @@ from service import (
     get_item_service,
     update_item_service,
     delete_item_service,
+    adjust_stock_service,
 )
 
 from exceptions import BusinessRuleError, ItemNotFoundError
@@ -87,6 +88,11 @@ def get_item_api(id: int):
     row = get_item_service(id)
 
     return row
+
+
+@app.post("/items/{id}/stock-adjustments", response_model=ItemResponse)
+def adjust_stock_api(id: int, adjustment: StockAdjustment):
+    return adjust_stock_service(id, adjustment.change)
 
 
 @app.delete(

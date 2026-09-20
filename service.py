@@ -13,6 +13,9 @@ from exceptions import BusinessRuleError, ItemNotFoundError
 
 
 def validate_item(item: Item):
+    if item.quantity < 0:
+        raise BusinessRuleError("Quantity can not be less than 0")
+
     if item.quantity > 10000:
         raise BusinessRuleError("Quantity can not greater than 10000")
 
@@ -134,3 +137,31 @@ def delete_item_service(id: int) -> None:
 
     finally:
         conn.close()
+
+
+def adjust_stock_service(
+    id: int,
+    change: int,
+) -> Item:
+    conn = get_connection()
+
+    try:
+        item = get_item(conn, id)
+
+        if item is None:
+            raise ItemNotFoundError(id)
+
+        item.quantity += change
+
+        validate_item(item)
+
+        update_item(conn, item)
+
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
+
+    return item
