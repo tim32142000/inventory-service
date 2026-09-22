@@ -11,6 +11,7 @@
 - 查詢單一商品
 - 更新商品
 - 刪除商品
+- 調整商品庫存
 - 依分類篩選商品
 - 依價格升冪或降冪排序
 - 業務規則與輸入驗證
@@ -114,6 +115,9 @@ python -m uvicorn main:app --reload
 | `GET`    | `/items/{id}` | 查詢單一商品      |
 | `PUT`    | `/items/{id}` | 更新商品        |
 | `DELETE` | `/items/{id}` | 刪除商品        |
+| `POST`   | `/items/{id}/stock-adjustments` | 調整商品庫存 |
+
+
 
 ### 依分類篩選
 
@@ -182,7 +186,7 @@ python -m pytest tests/test_service.py -v
 inventory-service/
 ├── main.py               # FastAPI 路由與錯誤處理
 ├── models.py             # API 輸入與輸出模型
-├── database_models.py    # 內部商品資料模型
+├── domain_models.py      # 內部商品資料模型
 ├── service.py            # 業務規則與交易控制
 ├── database.py           # SQLite 查詢
 ├── exceptions.py         # 自訂例外
