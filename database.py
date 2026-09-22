@@ -1,6 +1,6 @@
 import sqlite3
 
-from database_models import Item
+from domain_models import Item
 
 DB_NAME = "items.db"
 

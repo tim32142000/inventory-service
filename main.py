@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 from typing import Literal
 
 from models import ItemCreate, ItemResponse, StockAdjustment
-from database_models import Item
+from domain_models import Item
 
 from database import (
     init_db,
@@ -64,17 +64,20 @@ def root():
     status_code=status.HTTP_201_CREATED,
 )
 def create_item_api(item: ItemCreate):
-    db_item = Item(
+    internal_item = Item(
         name=item.name,
         category=item.category,
         price=item.price,
         quantity=item.quantity,
     )
 
-    return create_item_service(db_item)
+    return create_item_service(internal_item)
 
 
-@app.get("/items", response_model=list[ItemResponse])
+@app.get(
+    "/items",
+    response_model=list[ItemResponse],
+)
 def get_list_items_api(
     category: str | None = None,
     sort_by: Literal["price"] | None = None,
@@ -83,14 +86,20 @@ def get_list_items_api(
     return get_list_items_service(category, sort_by, order)
 
 
-@app.get("/items/{id}", response_model=ItemResponse)
+@app.get(
+    "/items/{id}",
+    response_model=ItemResponse,
+)
 def get_item_api(id: int):
     row = get_item_service(id)
 
     return row
 
 
-@app.post("/items/{id}/stock-adjustments", response_model=ItemResponse)
+@app.post(
+    "/items/{id}/stock-adjustments",
+    response_model=ItemResponse,
+)
 def adjust_stock_api(id: int, adjustment: StockAdjustment):
     return adjust_stock_service(id, adjustment.change)
 
@@ -103,9 +112,12 @@ def delete_item_api(id: int):
     delete_item_service(id)
 
 
-@app.put("/items/{id}", response_model=ItemResponse)
+@app.put(
+    "/items/{id}",
+    response_model=ItemResponse,
+)
 def update_item_api(id: int, item: ItemCreate):
-    db_item = Item(
+    internal_item = Item(
         id=id,
         name=item.name,
         category=item.category,
@@ -113,7 +125,7 @@ def update_item_api(id: int, item: ItemCreate):
         quantity=item.quantity,
     )
 
-    updated_item = update_item_service(db_item)
+    updated_item = update_item_service(internal_item)
 
     return updated_item
 

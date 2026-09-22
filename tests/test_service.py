@@ -3,7 +3,7 @@ import pytest
 import database
 import service
 
-from database_models import Item
+from domain_models import Item
 from exceptions import ItemNotFoundError
 
 def test_get_item_service_not_found(test_db):

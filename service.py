@@ -6,7 +6,7 @@ from database import (
     delete_item,
     get_connection,
 )
-from database_models import Item
+from domain_models import Item
 from exceptions import BusinessRuleError, ItemNotFoundError
 
 # Business Rule in this file
