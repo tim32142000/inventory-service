@@ -26,6 +26,8 @@
 - SQLite
 - pytest
 - HTTPX2
+- SQLAlchemy
+- Alembic
 
 目前已使用 Python 3.14 驗證安裝與測試流程。
 
@@ -72,7 +74,7 @@ python -m pip check
 在專案根目錄執行：
 
 ```powershell
-python -m uvicorn main:app --reload
+python -m uvicorn inventory_service.main:app
 ```
 
 啟動後可開啟：
@@ -184,15 +186,27 @@ python -m pytest tests/test_service.py -v
 
 ```text
 inventory-service/
-├── main.py               # FastAPI 路由與錯誤處理
-├── models.py             # API 輸入與輸出模型
-├── domain_models.py      # 內部商品資料模型
-├── service.py            # 業務規則與交易控制
-├── database.py           # SQLite 查詢
-├── exceptions.py         # 自訂例外
-├── requirements.txt      # Python 依賴
-└── tests/
-    ├── conftest.py       # 共用測試資料庫設定
-    ├── test_api.py       # API 測試
-    └── test_service.py   # Service 與交易測試
+├── inventory_service/
+│   ├── __init__.py
+│   ├── main.py                    # FastAPI 應用程式與路由
+│   ├── database/
+│   │   └── __init__.py
+│   └── items/
+│       ├── __init__.py
+│       ├── schemas.py             # API 輸入與輸出模型
+│       ├── domain.py              # 商品 Domain model
+│       ├── orm.py                 # SQLAlchemy ORM model
+│       ├── repository.py          # 商品資料庫操作
+│       ├── service.py             # 業務規則與交易控制
+│       └── exceptions.py          # 商品相關例外
+├── alembic/
+│   ├── versions/                  # 資料庫 migration
+│   └── env.py                     # Alembic 執行環境
+├── tests/
+│   ├── conftest.py                # 共用測試資料庫設定
+│   ├── test_api.py                # API 測試
+│   └── test_service.py            # Service 與交易測試
+├── alembic.ini                    # Alembic 設定
+├── requirements.txt               # Python 依賴
+└── README.md
 ```

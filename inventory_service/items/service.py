@@ -1,4 +1,4 @@
-from database import (
+from inventory_service.items.repository import (
     create_item,
     get_list_items,
     get_item,
@@ -6,8 +6,8 @@ from database import (
     delete_item,
     get_connection,
 )
-from domain_models import Item
-from exceptions import BusinessRuleError, ItemNotFoundError
+from inventory_service.items.domain import Item
+from inventory_service.items.exceptions import BusinessRuleError, ItemNotFoundError
 
 # Business Rule in this file
 

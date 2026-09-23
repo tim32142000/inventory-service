@@ -1,8 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 
-import database
-from main import app
+from inventory_service.main import app
 
 
 @pytest.fixture

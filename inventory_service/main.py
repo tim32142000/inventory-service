@@ -7,16 +7,12 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from typing import Literal
 
-from models import ItemCreate, ItemResponse, StockAdjustment
-from domain_models import Item
+from inventory_service.items.schemas import ItemCreate, ItemResponse, StockAdjustment
+from inventory_service.items.domain import Item
 
-from database import (
-    init_db,
-    get_list_items,
-    delete_item,
-)
+from inventory_service.items.repository import init_db
 
-from service import (
+from inventory_service.items.service import (
     create_item_service,
     get_list_items_service,
     get_item_service,
@@ -25,7 +21,7 @@ from service import (
     adjust_stock_service,
 )
 
-from exceptions import BusinessRuleError, ItemNotFoundError
+from inventory_service.items.exceptions import BusinessRuleError, ItemNotFoundError
 
 
 @asynccontextmanager
@@ -130,5 +126,4 @@ def update_item_api(id: int, item: ItemCreate):
     return updated_item
 
 
-if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=8000)
+

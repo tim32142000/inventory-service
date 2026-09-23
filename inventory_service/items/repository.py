@@ -1,6 +1,6 @@
 import sqlite3
 
-from domain_models import Item
+from inventory_service.items.domain import Item
 
 DB_NAME = "items.db"
 

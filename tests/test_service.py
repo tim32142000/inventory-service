@@ -1,10 +1,10 @@
 import pytest
 
-import database
-import service
+import inventory_service.items.repository as repository
+import inventory_service.items.service as service
 
-from domain_models import Item
-from exceptions import ItemNotFoundError
+from inventory_service.items.domain import Item
+from inventory_service.items.exceptions import ItemNotFoundError
 
 def test_get_item_service_not_found(test_db):
     item_id = 999999
@@ -24,7 +24,7 @@ def test_create_two_items_service_rollback(test_db, monkeypatch):
         call_count += 1
 
         if call_count == 1:
-            return database.create_item(conn, item)
+            return repository.create_item(conn, item)
 
         raise RuntimeError("forced failure")
 
@@ -39,5 +39,5 @@ def test_create_two_items_service_rollback(test_db, monkeypatch):
 
     assert call_count == 2
 
-    with database.get_connection() as conn:
-        assert database.get_list_items(conn) == []
+    with repository.get_connection() as conn:
+        assert repository.get_list_items(conn) == []
