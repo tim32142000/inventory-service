@@ -1,10 +1,21 @@
 import pytest
 
+from pathlib import Path
+
 import inventory_service.items.repository as repository
 import inventory_service.items.service as service
+import inventory_service.database.session as database_session
 
 from inventory_service.items.domain import Item
 from inventory_service.items.exceptions import ItemNotFoundError
+
+
+def test_session_factory_uses_test_database(test_db):
+    with database_session.SessionFactory() as session:
+        database_path = Path(session.get_bind().url.database)
+
+    assert database_path.resolve() == test_db.resolve()
+
 
 def test_get_item_service_not_found(test_db):
     item_id = 999999
