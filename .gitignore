@@ -51,6 +51,9 @@ coverage.xml
 .pytest_cache/
 cover/
 
+# Personal test
+playground.py
+
 # Translations
 *.mo
 *.pot
@@ -151,6 +154,7 @@ activemq-data/
 .env
 .envrc
 .venv
+.venv/
 env/
 venv/
 ENV/
